@@ -1,95 +1,103 @@
 #include<stdio.h>
-#include<stdlib.h>
-#include<sys/inotify.h>
-#include<unistd.h>
-#include<limits.h>
+#include<sqlite3.h>
 #include<string.h>
-#include<errno.h>
-#include <linux/limits.h>
+
+void init_db(sqlite3 *db){
+    const char *sql1 = "CREATE TABLE IF NOT EXISTS LINES (file_name TEXT, line_no INT, content TEXT)";
+    char *err_msg = 0;
+    int rc = sqlite3_exec(db,sql1,0,0,&err_msg);
+
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        sqlite3_free(err_msg);
+    } else {
+        fprintf(stdout, "Table created successfully\n");
+    }
+}
+
+int insert_line(sqlite3 *db,char *filename,int line_no,char *content){
+    const char *sql = "INSERT INTO LINES (file_name,line_no,content) values (?,?,?)";
+    printf("%s %d %s \n",filename,line_no,content);
+    sqlite3_stmt *sql_stmt;
+    sqlite3_prepare_v2(db,sql,-1,&sql_stmt,NULL);
+    sqlite3_bind_text(sql_stmt,1,filename,-1,SQLITE_STATIC);
+    sqlite3_bind_int(sql_stmt,2,line_no);
+    sqlite3_bind_text(sql_stmt,3,content,-1,SQLITE_STATIC);
+
+    int rc = sqlite3_step(sql_stmt);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr,"Failed to insert the line %s\n",sqlite3_errmsg(db));
+    }   
+
+    sqlite3_finalize(sql_stmt);
+}
 
 
-#define BUFF_LEN (10* (sizeof(struct inotify_event) + NAME_MAX + 1))
+void insert_lines(sqlite3 *db) {
+    char filename[FILENAME_MAX];
+    char line_content[1024 * 10];
+    int line_no = 1;
 
+    printf("Enter filename : \n");
+    scanf("%s", filename);
+    printf("%s\n", filename);
 
-void copy_file(char *src_path,char *dest_path) {
-    char command[256 + PATH_MAX * 2 ];
-    snprintf(command,sizeof(command),"./itrans/itrans -eh ./itrans/map.txt %s %s",src_path,dest_path);
+    // Clear buffer after reading filename
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
 
-    int ret = system(command);
+    while (1) {
+        int choice;
+        printf("******************************************\n");
+        printf("1) Add line \n");
+        printf("2) Stop \n");
+        printf("******************************************\n");
+        printf("Enter your choice : ");
+        scanf("%d", &choice);
 
-    if(ret == -1) {
-        perror("Error excecuting the command");
-    }else{
-        printf("Command executed sucessfully\n");
+        // Clear buffer after reading choice
+        while ((c = getchar()) != '\n' && c != EOF);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the line content: ");
+                fgets(line_content, sizeof(line_content), stdin);
+
+                // Remove trailing newline
+                line_content[strcspn(line_content, "\n")] = '\0'; 
+                
+                insert_line(db, filename, line_no, line_content);
+                line_no++;
+                break;
+            case 2:
+                return;
+            default:
+                printf("Invalid choice. Try again.\n");
+                break;
+        }
     }
 }
 
 
-void handle_event(struct inotify_event *event,char *src,char *dest) {
-    if (event->mask & IN_MODIFY) {
-        printf("File modified: %s\n", event->name);
-            // Construct source and destination paths
-        char src_path[PATH_MAX];
-        char dest_path[PATH_MAX];
-        snprintf(src_path, PATH_MAX, "%s/%s", src, event->name);
-        snprintf(dest_path, PATH_MAX, "%s/%s", dest, event->name);
-
-        printf("%s\n",src_path);
-        printf("%s\n",dest_path);
-        
-        copy_file(src_path, dest_path);
-    }
-}
-
-int main(int argc, char * argv[]){
-    if (argc < 2) {
-        fprintf(stderr, "Directory not provided for monitoring\n");
-        return 0;
-    }
-    if (argc < 3) {
-        fprintf(stderr, "Destination directory not provided\n");
-        return 0;
+int main(int argc,char *argv[]){
+    char *db_uri = "./db.db";
+    if (argc > 1){
+        db_uri = argv[1];
     }
 
-    char *source_dir = argv[1];
-    char *destination_dir = argv[2];
-
-    int inotify_fd = inotify_init();
-    if (inotify_fd == -1) {
-        perror("inotify_init");
-        exit(EXIT_FAILURE);
+    sqlite3 *db;
+    int rc = sqlite3_open(db_uri,&db);
+    if (rc) {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        return 1;
+    } else {
+        fprintf(stdout, "Opened database successfully\n");
     }
 
-    int wd = inotify_add_watch(inotify_fd,source_dir, IN_CREATE | IN_MODIFY | IN_DELETE );
-    if (wd == -1) {
-        perror("inotify_add_watch");
-        exit(EXIT_FAILURE);
-    }
+    init_db(db);
 
-    printf("Monitoring directory: %s\n",source_dir);
+    insert_lines(db);
 
-    char buff[BUFF_LEN] __attribute__((aligned(8)));
-    ssize_t num_read;
-
-    while(1){
-        num_read = read(inotify_fd,buff,BUFF_LEN);
-        if (num_read == 0) {
-            fprintf(stderr, "read() from inotify fd returned 0!");
-            exit(EXIT_FAILURE);
-        }
-        if(num_read == -1){
-            perror("read");
-            exit(EXIT_FAILURE);
-        }
-
-        char *ptr = buff;
-
-        while(ptr < buff + num_read) {
-            struct inotify_event *event = (struct inotify_event *)ptr;
-            handle_event(event,source_dir,destination_dir);
-            ptr += sizeof(struct inotify_event) + event->len;
-        }
-    }
-
+    sqlite3_close(db);
     return 0;
 }
