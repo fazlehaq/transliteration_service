@@ -94,10 +94,42 @@ int main(int argc,char *argv[]){
         fprintf(stdout, "Opened database successfully\n");
     }
 
+    // initialize db 
     init_db(db);
 
-    insert_lines(db);
+    while(1){
+        int choice;
+        printf("************************\n");
+        printf("1) Add new file\n");
+        printf("2) Append lines to file\n");
+        printf("3) Import files\n");
+        printf("4) Get file\n");
+        printf("5) Exit\n");
+        printf("Your choice : ");
+        scanf("%d",&choice);
+        switch (choice){
+            case 1:
+                insert_lines(db);
+                break;
+            case 2:
+            case 3:
+            case 4:
+                printf("Not implemented Yet");
+                break;
 
+            case 5 :
+                break;
+
+            default:
+                printf("Incorrect choice\n");
+                break;
+        }
+
+        if (choice == 5) break;
+        printf("************************\n");
+
+    }
+    
     sqlite3_close(db);
     return 0;
 }
