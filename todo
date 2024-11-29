@@ -1,0 +1,18 @@
+# This file is for main_2.c
+
+# Features
+
+[ ] -
+[ ] - Import from files
+[ ] - handling delete for line number
+[ ] - handling update for line using direct | regex/grep ?
+
+# Improvements
+
+[ ] - Add primary key in the lines table probably PK(filename+line_no)
+
+# Decision Or Choices
+
+[ ] - Logic handling for inserting lines or Importing files for pre exisiting files in db
+[ ] - line_no becomes in-consistent when a line in middle is deleted
+[ ] - Should i use constant large buffer for the line reading or should i write my own dynamic vector
