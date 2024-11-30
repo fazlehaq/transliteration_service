@@ -1,6 +1,63 @@
 #include<stdio.h>
 #include<sqlite3.h>
 #include<string.h>
+#include"queries.h"
+#include<limits.h>
+
+
+// Helper functions
+int is_file_exists(sqlite3 *db,char *filename){
+    const char *sql_query = FILE_EXISTS_QUERY;
+    sqlite3_stmt *sql_stmt;
+    int rc;
+
+    rc = sqlite3_prepare_v2(db,sql_query,-1,&sql_stmt,NULL);
+
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return -1; // Error in preparing statement
+    }
+    
+    sqlite3_bind_text(sql_stmt,1,filename,-1,SQLITE_STATIC);
+
+    rc = sqlite3_step(sql_stmt);
+    int exists;
+    if (rc == SQLITE_ROW) {
+        exists = sqlite3_column_int(sql_stmt, 0);
+    } else {
+        fprintf(stderr, "Error executing query: %s\n", sqlite3_errmsg(db));
+    }
+
+    sqlite3_finalize(sql_stmt);
+
+    return exists;
+}
+
+int get_last_line_number(sqlite3 *db,char * filename){
+    const char *sql_query = LAST_LINE_NUMBER_QUERY;
+    if (filename == NULL){
+        printf("Enter the filename\n");
+        scanf("%s",filename);
+    }
+
+    sqlite3_stmt *sql_stmt;
+    int rc = sqlite3_prepare_v2(db,sql_query,-1,&sql_stmt,NULL);
+
+    if (rc != SQLITE_OK){
+        fprintf(stderr,"Could not prepare the statement : %s" ,sqlite3_errmsg(db));
+        return -1;
+    }
+
+    sqlite3_bind_text(sql_stmt,1,filename,-1,SQLITE_STATIC);
+
+    if( sqlite3_step(sql_stmt) == SQLITE_ROW){
+        return sqlite3_column_int(sql_stmt,0);
+    }
+
+    return -1;
+
+}
+
 
 void init_db(sqlite3 *db){
     const char *sql1 = "CREATE TABLE IF NOT EXISTS LINES (file_name TEXT, line_no INT, content TEXT)";
@@ -16,7 +73,7 @@ void init_db(sqlite3 *db){
 }
 
 int insert_line(sqlite3 *db,char *filename,int line_no,char *content){
-    const char *sql = "INSERT INTO LINES (file_name,line_no,content) values (?,?,?)";
+    const char *sql = INSERT_LINE_QUERY;
     printf("%s %d %s \n",filename,line_no,content);
     sqlite3_stmt *sql_stmt;
     sqlite3_prepare_v2(db,sql,-1,&sql_stmt,NULL);
@@ -31,7 +88,6 @@ int insert_line(sqlite3 *db,char *filename,int line_no,char *content){
 
     sqlite3_finalize(sql_stmt);
 }
-
 
 void insert_lines(sqlite3 *db) {
     char filename[FILENAME_MAX];
@@ -51,7 +107,6 @@ void insert_lines(sqlite3 *db) {
         printf("******************************************\n");
         printf("1) Add line \n");
         printf("2) Stop \n");
-        printf("******************************************\n");
         printf("Enter your choice : ");
         scanf("%d", &choice);
 
@@ -78,6 +133,60 @@ void insert_lines(sqlite3 *db) {
     }
 }
 
+void import_file(sqlite3 *db){
+    char filename[FILENAME_MAX];
+    printf("Enter the name of the file : ");
+    scanf("%s",filename);
+
+    FILE *fp = fopen(filename,"rb");
+    if (fp == NULL){
+        fprintf(stderr,"Could not open the file %s\n",filename);
+        return ;
+    }
+    int line_no = 1;
+    char BUFFER[1024*10];
+    while(fgets(BUFFER,sizeof(BUFFER),fp) != NULL){
+        BUFFER[strcspn(BUFFER, "\n")] = '\0'; 
+        insert_line(db,filename,line_no,BUFFER);
+        line_no ++;
+    }
+    printf("File saved ! \n\n");
+}
+
+void list_lines(sqlite3 *db){
+    char *sql_query = GET_LINES_IN_RANGE_QUERY;
+    int start,end;
+    char filename[FILENAME_MAX];
+    printf("Enter the name of the file\n");
+    scanf("%s",filename);
+    printf("Enter start & end : ");
+    scanf("%d",&start);
+    scanf("%d",&end);
+
+    printf("%d %d\n",start,end);
+
+    int rc;
+
+    sqlite3_stmt *sql_stmt;
+    rc = sqlite3_prepare_v2(db,sql_query,-1,&sql_stmt,NULL);
+
+    if (rc != SQLITE_OK){
+        fprintf(stderr,"Could not prepare the statement : %s" ,sqlite3_errmsg(db));
+        return;
+    }
+    
+    sqlite3_bind_text(sql_stmt,1,filename,-1,NULL);
+    sqlite3_bind_int(sql_stmt,2,start);
+    sqlite3_bind_int(sql_stmt,3,end);
+
+    while(sqlite3_step(sql_stmt) == SQLITE_ROW){
+        int line_no = sqlite3_column_int(sql_stmt,1);
+        const char * line_content = sqlite3_column_text(sql_stmt,2);
+        printf("%d  %s\n",line_no,line_content);
+    }
+
+}
+
 
 int main(int argc,char *argv[]){
     char *db_uri = "./db.db";
@@ -102,30 +211,36 @@ int main(int argc,char *argv[]){
         printf("************************\n");
         printf("1) Add new file\n");
         printf("2) Append lines to file\n");
-        printf("3) Import files\n");
+        printf("3) Import file\n");
         printf("4) Get file\n");
+        printf("5) Get lines in range\n");
         printf("5) Exit\n");
         printf("Your choice : ");
         scanf("%d",&choice);
+
         switch (choice){
             case 1:
                 insert_lines(db);
                 break;
-            case 2:
             case 3:
+                import_file(db);
+                break;
+            case 5 :
+                list_lines(db);
+                break;
+
+            case 2:
             case 4:
                 printf("Not implemented Yet");
                 break;
-
-            case 5 :
-                break;
+                
 
             default:
                 printf("Incorrect choice\n");
                 break;
         }
 
-        if (choice == 5) break;
+        if (choice == 6) break;
         printf("************************\n");
 
     }
