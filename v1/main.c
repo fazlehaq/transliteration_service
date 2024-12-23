@@ -28,14 +28,11 @@ void copy_file(char *src_path,char *dest_path) {
 void handle_event(struct inotify_event *event,char *src,char *dest) {
     if (event->mask & IN_MODIFY) {
         printf("File modified: %s\n", event->name);
-            // Construct source and destination paths
+        
         char src_path[PATH_MAX];
         char dest_path[PATH_MAX];
         snprintf(src_path, PATH_MAX, "%s/%s", src, event->name);
         snprintf(dest_path, PATH_MAX, "%s/%s", dest, event->name);
-
-        printf("%s\n",src_path);
-        printf("%s\n",dest_path);
         
         copy_file(src_path, dest_path);
     }
