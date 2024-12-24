@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<linux/limits.h>
 
 // Macro Definations
 #define DB_DIR_PATH "./db"
@@ -7,15 +8,18 @@
 
 
 // Function declrations
-int set_file(char *);
-int set_db(char *);
+int set_file(char *); // sets the global variable 
+int set_db(char *);   // sets the global variable
 int set_lang_flag(char *); // either -d (devnagiri) or -e (unicode english)
 int read_into_the_file(int,int); 
+int insert_file(char *); // creates new file
+int get_file(char *); // retrieves the name of the file
+int get_db(char *); // retrieves the name of the db
 
 // Global Variables
-char *DB_PATH;
-char *FILE_NAME;
-char *LANG_FLAG;
+char DB_PATH[NAME_MAX];
+char FILE_NAME[NAME_MAX];
+char LANG_FLAG[2];
 
 int main(){
     return 0;
