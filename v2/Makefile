@@ -21,6 +21,7 @@ $(OBJ_DIR)/%.o : %.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR) :
+	mkdir -p io
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(OBJ_DIR)/src
 
