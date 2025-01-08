@@ -1,31 +1,24 @@
-# Compiler and flags
 CC = gcc
-CFLAGS = -Wall -g
-
-# Directories
+CFLAGS = -Wall
+LDFLAGS = -lsqlite3
+OBJ_DIR = obj
 SRC_DIR = src
-OBJ_DIR = objs
-EXEC = service.o
+SRCS = main.c $(SRC_DIR)/utils.c $(SRC_DIR)/db.c
+OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/db.o
+TARGET = main
 
-# Source files and object files
-SRCS = main.c $(wildcard $(SRC_DIR)/*.c)
-OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o)
+obj_dir:
+	@mkdir -p $(OBJ_DIR)
 
-# Default target
-all: $(EXEC)
-
-$(EXEC) : $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
-
-$(OBJ_DIR)/%.o : %.c | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: %.c | obj_dir
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR) :
-	mkdir -p io
-	mkdir -p $(OBJ_DIR)
-	mkdir -p $(OBJ_DIR)/src
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | obj_dir
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) -o $(TARGET)
 
 clean:
-	rm -rf $(OBJ_DIR) $(EXEC)
-
-.PHONY: all clean
+	@rm -rf $(OBJ_DIR) $(TARGET)
+	@echo "Cleaned up build files."
