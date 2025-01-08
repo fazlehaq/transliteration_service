@@ -10,7 +10,7 @@ int is_file_exists(char * path){
     return stat(path,&buffer) == 0;
 }
 
-FILE * create_new_file(const char *filename) {
+FILE* create_new_file(char *filename) {
     if (is_file_exists(filename)) {
         fprintf(stderr,"File '%s' already exists.\n", filename);
         return NULL;
@@ -22,7 +22,6 @@ FILE * create_new_file(const char *filename) {
         return NULL; // Failure
     }
 
-    fclose(file);
-    return 1; // Success
+    return file; // Success
 }
     
