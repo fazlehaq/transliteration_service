@@ -19,15 +19,15 @@ void close_database(sqlite3 *db) {
     }
 }
 
-    int execute_query(sqlite3 *db, const char *sql) {
+int execute_query(sqlite3 *db, const char *sql) {
     char *errmsg = NULL;
     int rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
-        return 0; // Failure
+        return !SQLITE_OK; // Failure
     }
-    return 1; // Success
+    return SQLITE_OK; // Success
 }
 
 sqlite3 * init_empty_db(char *file_name){
@@ -42,7 +42,7 @@ sqlite3 * init_empty_db(char *file_name){
 
     char *sql = FILE_SCHEMA;
     
-    if(execute_query(db,sql)) {
+    if(execute_query(db,sql) == SQLITE_OK) {
         printf("Initialized sucessfully\n");
         return db;
     }
