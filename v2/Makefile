@@ -11,13 +11,13 @@ obj_dir:
 	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: %.c | obj_dir
-	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | obj_dir
-	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 $(TARGET): $(OBJS)
-	$(CC) $(OBJS) -o $(TARGET)
+	@$(CC) $(CFLAGS)  $(OBJS) -o $(TARGET) $(LDFLAGS)
 
 clean:
 	@rm -rf $(OBJ_DIR) $(TARGET)
