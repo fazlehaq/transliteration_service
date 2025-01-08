@@ -1,4 +1,5 @@
 #include<sys/stat.h>
+#include<stdio.h>
 #include"../headers/utils.h"
 
 /// @brief Takes the path of the file and check if exists
@@ -8,3 +9,20 @@ int is_file_exists(char * path){
     struct stat buffer;
     return stat(path,&buffer) == 0;
 }
+
+FILE * create_new_file(const char *filename) {
+    if (is_file_exists(filename)) {
+        fprintf(stderr,"File '%s' already exists.\n", filename);
+        return NULL;
+    }
+
+    FILE *file = fopen(filename, "w"); // Create an empty file
+    if (!file) {
+        fprintf(stderr, "Failed to create file '%s'.\n", filename);
+        return NULL; // Failure
+    }
+
+    fclose(file);
+    return 1; // Success
+}
+    
