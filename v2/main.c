@@ -3,6 +3,7 @@
 #include<string.h>
 #include<linux/limits.h>
 #include"headers/utils.h"
+#include"headers/db.h"
 
 // Macro Definations
 #define DB_DIR_PATH "./db"
@@ -20,7 +21,7 @@ int get_db_path(char *); // retrieves the name of the db
 
 
 // Global Variables
-char LANG_FLAG[2];
+char LANG_FLAG[3];
 char DB_PATH[PATH_MAX];
 char DUMP_FILE_PATH[PATH_MAX];
 
@@ -28,6 +29,7 @@ char DUMP_FILE_PATH[PATH_MAX];
 int main(){
     set_lang_flag(" -h");
     set_lang_flag(" -e ");
+    init_empty_db("./db/test.db");
     return 0;
 }
 
