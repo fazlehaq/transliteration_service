@@ -129,7 +129,7 @@ int insert_file(char *filename) {
     }
 
     // Doing transliteration
-    itrans(DUMP_FILE_PATH, ITRANS_IO_FILE_PATH, strncmp(LANG_FLAG, "-e", 2) == 0 ? "-he" : "-eh");
+    itrans(DUMP_FILE_PATH, ITRANS_IO_FILE_PATH, (strncmp(LANG_FLAG, "-h",3) == 0 )? "-eh" : "-he");
 
     // transliterated file
     FILE *itrans_io_file = fopen(ITRANS_IO_FILE_PATH, "r");
