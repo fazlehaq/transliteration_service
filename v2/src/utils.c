@@ -1,5 +1,6 @@
 #include<sys/stat.h>
 #include<stdio.h>
+#include<linux/limits.h>
 #include"../headers/utils.h"
 
 /// @brief Takes the path of the file and check if exists
@@ -24,4 +25,16 @@ FILE* create_new_file(char *filename) {
 
     return file; // Success
 }
-    
+
+int itrans(char *src_path,char *dest_path,char *flag){
+    char command[256 + PATH_MAX * 2 ];
+    snprintf(command,sizeof(command),"./obj/itrans %s ./src/itrans/map.txt %s %s",flag,src_path,dest_path);
+
+    int ret = system(command);
+
+    if(ret == -1) {
+        perror("Error excecuting the command");
+    }else{
+        printf("Command executed sucessfully\n");
+    }
+}

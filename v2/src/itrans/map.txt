@@ -1,0 +1,103 @@
+<Vowels>
+अ		a;
+आ		A/aa;
+इ		i;
+ई		I/ii/ee;
+उ		u;
+ऊ		U/uu;
+ऋ		RRi/R^i;
+ॠ		RRI/R^I;
+ऌ		LLi/L^i;
+ॡ		LLI/L^I;
+ऎ 		^e;
+ए		e/E;
+ऍ		ae/aE;
+ऐ		ai;
+ऒ 		^o;
+ओ		o/O;
+औ		au;
+ॲ		aU;
+ऑ		AU;
+ऽ 		.a;
+ॐ		OM, AUM;
+
+<Consonant>
+क	ka/k;
+ख	kha/kh;
+ग	ga/g;
+घ	gha/gh;
+ङ	~Na/~N;	
+					
+च	cha/ch;					
+छ	Cha/Ch;
+ज	ja/j;
+झ	jha/jh;
+ञ	~na/~n;
+	
+ट	Ta/T;					
+ठ	Tha/Th;
+ड	Da/D;
+ढ	Dha/Dh;
+ण	Na/N;
+
+त	ta/t;					
+थ	tha/th;
+द	da/d;
+ध	dha/dh;
+न	na/n;
+
+प	pa/p;					
+फ	pha/ph;
+ब	ba/b;
+भ	bha/bh;
+म	ma/m;
+	
+य	ya/y;				
+र	ra/r;
+ल	la/l;
+व	va/v;	
+
+श	sha/sh;					
+ष	Sha/Sh;
+स	sa/s;
+ह	ha/h;
+ळ	La/L;
+
+<Consonants with Nuqta>
+क़	qa/q;
+ख़	Ka/K;
+ग़	Ga/G;
+ज़	za/z;
+फ़	fa/f;
+ड़	.Da/.D/Ra/R;
+ढ़	.Dha/.Dh/Rha/Rh;
+व़	wa/w;
+
+<Irregular consonant cluster>
+क्ष	kSa/kSha/xa;
+त्र	tra/tr;
+ज्ञ	GYa/j~na;
+श्र 	shra;
+
+<@Vowels>
+ा		aa/A;
+ी		i;
+ि		I/ii/ee;
+ु		u;
+ू		U/uu;
+ृ 		RRi/R^i;
+ॢ		LLi/L^i;
+े		e/E;
+ै		ai;
+ो		o/O;
+ौ 		au;
+ं 		M/.m/.n;
+ः		H;
+ँ 		.N;
+् 		.h;
+ॅ		.c;
+<END>
+
+
+
+	
